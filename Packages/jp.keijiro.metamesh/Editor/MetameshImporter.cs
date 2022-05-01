@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Rendering;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
 #else
@@ -33,9 +34,22 @@ public sealed class MetameshImporter : ScriptedImporter
         var meshFilter = gameObject.AddComponent<MeshFilter>();
         meshFilter.sharedMesh = mesh;
 
+        var pipelineAsset = GraphicsSettings.currentRenderPipeline;
+        var pipelineAssetTypeString = pipelineAsset?.GetType().ToString();
+
+        var baseMaterial = default(Material);
+        if (pipelineAssetTypeString != null && pipelineAssetTypeString.Contains("UniversalRenderPipeline"))
+            // Universal Render Pipeline/Lit for UniversalRenderPipelineAsset
+            baseMaterial = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath("31321ba15b8f8eb4c954353edc038b1d"));
+        else if (pipelineAssetTypeString != null && pipelineAssetTypeString.Contains("HDRenderPipeline"))
+            // HDRP/Lit from DefaultHDMaterial for HDRenderPipelineAsset
+            baseMaterial = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath("73c176f402d2c2f4d929aa5da7585d17"));
+        else
+            // BiRP Standard material
+            baseMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+        
         var meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.sharedMaterial =
-            AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+        meshRenderer.sharedMaterial = baseMaterial;
 
         context.AddObjectToAsset("prefab", gameObject);
         if (mesh != null) context.AddObjectToAsset("mesh", mesh);
