@@ -24,7 +24,7 @@ public sealed class MetameshImporter : ScriptedImporter
     [SerializeField] Ring _ring = new Ring();
     [SerializeField] Disc _disc = new Disc();
     [SerializeField] bool _generateLightmapUVs = false;
-    [InspectorName("Read/Write Enabled")] [SerializeField] bool _readWriteMeshes = false;
+    [SerializeField] bool _readWriteMeshes = false;
 
     public override void OnImportAsset(AssetImportContext context)
     {
